@@ -170,7 +170,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"LWIS TRACK RESPONCE", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"LWIS TRACK RESPONSE", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Password", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"OTRS Login Details", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"LWIS file to send emails", None))
