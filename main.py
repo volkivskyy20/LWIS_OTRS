@@ -33,12 +33,41 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ui.btn_week.clicked.connect(self.select_week_file)
         self.ui.btn_snd.clicked.connect(self.select_email_file)
         self.ui.pushButton.clicked.connect(self.prepare)
+        self.ui.pushButton_5.clicked.connect(self.prepare1)
         self.ui.pushButton_2.clicked.connect(self.snd_1151)
         self.ui.btn_dir.clicked.connect(self.dir1151)
         self.ui.btn_dir_2.clicked.connect(self.dirmain)
         self.ui.btn_prt_1151.clicked.connect(self.select_1151)
         self.ui.pushButton_3.clicked.connect(self.crtmaintkt)
         self.ui.pushButton_4.clicked.connect(self.crt1151tkt)
+
+    def prepare1(self):
+        # Your existing code for reading and processing the Excel file
+        input_excel_path = self.file_path
+        output_excel_path = 'prepared_emails.xlsx'
+        columns_to_extract = ['Relation', 'Email']
+        data = pd.read_excel(input_excel_path, usecols=columns_to_extract)
+        data = data.drop_duplicates()
+
+        # Split the 'Email' column by ';' or ',' and keep only the first part
+        data['Email'] = data['Email'].str.split('[;,]').str[0].str.strip()
+
+        data = data.query(
+            'Relation != 1156 and Relation != 1018 and Relation != 1293 and Relation != 1294 and Relation != 1295 and '
+            'Relation != 1296 and Relation != 1522 and Relation != 1151 and Relation != 1383')
+
+        # Save the processed data to a new Excel file
+        data.to_excel(output_excel_path, index=False)
+
+        # Your code for creating separate Excel files from the second Excel file
+        input_excel = self.selected_1151_file
+        df = pd.read_excel(input_excel)
+        for i, row in df.iterrows():
+            split_df = pd.DataFrame([row], columns=df.columns)
+            output_file = f'Partner_1151_{i + 1}.xlsx'
+            split_df.to_excel(output_file, index=False)
+
+        print(f"{len(df)} Excel files created by splitting each row.")
 
     def crt1151tkt(self):
         folder_path = self.directory
@@ -81,7 +110,6 @@ class MyWindow(QtWidgets.QMainWindow):
 
         # to click on the element(Login) found
         driver.find_element(By.XPATH, get_xpath(driver, 'wdz8eE4RTiLW0dT')).click()
-        driver.get('https://servicecentre.fl-app.rhenus.com/otrs/index.pl?Action=AgentTicketPhone')
         time.sleep(5)
         numbers = []
         field_values = []
@@ -104,10 +132,12 @@ class MyWindow(QtWidgets.QMainWindow):
             driver.find_element(By.XPATH, '//*[@id="Subject"]').click()
 
             driver.find_element(By.XPATH, '//*[@id="Subject"]').send_keys(filename)
+            time.sleep(1)
             field_value_element = driver.find_element(By.XPATH, '//*[@id="Subject"]')
             field_value = field_value_element.text
             field_values.append(field_value)
             iframe = driver.find_element(By.XPATH, "//iframe[@title='Rich Text Editor, RichText']")
+            time.sleep(1)
             text_to_input = "**"
             driver.switch_to.frame(iframe)
             contenteditable_field = driver.find_element(By.XPATH, "//body[@contenteditable='true']")
@@ -131,6 +161,7 @@ class MyWindow(QtWidgets.QMainWindow):
         # Save DataFrame to an Excel file
         excel_file_path = "Created tickets 1151.xlsx"
         dfs.to_excel(excel_file_path, index=False)
+        sys.exit()
 
     def crtmaintkt(self):
         oklog = self.ui.okta_login.text()  # Get text from okta_login QLineEdit
@@ -188,14 +219,15 @@ class MyWindow(QtWidgets.QMainWindow):
             driver.find_element(By.PARTIAL_LINK_TEXT, "Unclassified").click()
             time.sleep(2)
             driver.find_element(By.XPATH, '//*[@id="Dest_Search"]').send_keys("sc")
-            time.sleep(1)
+            time.sleep(2)
             driver.find_element(By.PARTIAL_LINK_TEXT, "SC Common").click()
-            time.sleep(1)
+            time.sleep(2)
             driver.find_element(By.XPATH, '//*[@id="FromCustomer"]').send_keys(row['Email'])
             time.sleep(1)
             driver.find_element(By.XPATH, '//*[@id="Subject"]').click()
             rel = str(row['Relation'])
             driver.find_element(By.XPATH, '//*[@id="Subject"]').send_keys('Partner ' + rel)
+            time.sleep(1)
             field_value_element = driver.find_element(By.XPATH, '//*[@id="Subject"]')
             field_value = field_value_element.text
             field_values.append(field_value)
@@ -205,7 +237,6 @@ class MyWindow(QtWidgets.QMainWindow):
             contenteditable_field = driver.find_element(By.XPATH, "//body[@contenteditable='true']")
             contenteditable_field.send_keys(text_to_input)
             time.sleep(10)
-
             current_url = driver.current_url
             keyword = "TicketID="
             if keyword in current_url:
@@ -223,6 +254,7 @@ class MyWindow(QtWidgets.QMainWindow):
         # Save DataFrame to an Excel file
         excel_file_path = "Created tickets.xlsx"
         dfs.to_excel(excel_file_path, index=False)
+        sys.exit()
 
     def snd_1151(self):
         oklog = self.ui.okta_login.text()  # Get text from okta_login QLineEdit
@@ -342,6 +374,7 @@ class MyWindow(QtWidgets.QMainWindow):
             time.sleep(1)
             driver.find_element(By.PARTIAL_LINK_TEXT, "LWIS check delivery").click()
             time.sleep(10)
+        sys.exit()
 
     def dirmain(self):
         options = QFileDialog.Options()
@@ -509,6 +542,7 @@ Soweit wir als Dienstleister beauftragt werden, arbeiten wir ausschließlich auf
             time.sleep(1)
             driver.find_element(By.PARTIAL_LINK_TEXT, "LWIS check delivery").click()
             time.sleep(10)
+        sys.exit()
 
     def select_week_file(self):
         options = QtWidgets.QFileDialog.Options()
